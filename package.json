@@ -1,0 +1,82 @@
+{
+  "name": "km-palette",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "this is a ready pallettes for using in applications",
+  "main": "build/js/index.js",
+  "module": "build/esm/index.mjs",
+  "types": "build/types/index.d.ts",
+  "typings": "build/types/index.d.ts",
+  "browser": {
+    "./browser-cjs.js": "./cjs/index.cjs",
+    "./browser-esm.js": "./mjs/index.mjs"
+  },
+  "repository": {
+    "url": "https://github.com/komeilm76/km-palette.git"
+  },
+  "scripts": {
+    "fix:prettier": "prettier \"src/**/*.{ts,json}\" --write && prettier \"*.json\" --write",
+    "fix": "bun run fix:prettier",
+    "dev": "bun --watch run ./src/index.ts",
+    "build:types": "tsc",
+    "build:tsup": "bun run build:types && tsup",
+    "build": "bun run build:types && bun run build:tsup",
+    "prepublishOnly": "npm run build",
+    "publish-directly": "npm publish --access public",
+    "auto-release": "npm run fix:prettier && npm run build && release-it"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "release-it": "^17.6.0",
+    "typescript": "~5.9.2",
+    "prettier": "^3.7.2"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "build",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "tsup",
+    "bun",
+    "release",
+    "publish",
+    "typeScript",
+    "km-packages"
+  ],
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "node": "./build/js/index.js",
+      "types": "./build/types/index.d.ts",
+      "require": "./build/cjs/index.cjs",
+      "import": "./build/esm/index.mjs",
+      "default": "./build/js/index.js"
+    },
+    "./esm": {
+      "types": "./build/esm/index.d.mts",
+      "import": "./build/esm/index.mjs"
+    },
+    "./js": {
+      "types": "./build/js/index.d.mts",
+      "default": "./build/js/index.js"
+    },
+    "./cjs": {
+      "types": "./build/cjs/index.d.ts",
+      "require": "./build/cjs/index.cjs"
+    },
+    "./assets/*": "./src/assets/*"
+  },
+  "dependencies": {
+    "@types/json-fixer": "^1.6.2",
+    "@types/lodash": "^4.17.20",
+    "@types/prettier": "^3.0.0",
+    "json-fixer": "^1.6.15",
+    "lodash": "^4.17.21",
+    "tsup": "^8.5.0"
+  }
+}
