@@ -1,6 +1,6 @@
 {
   "name": "km-palette",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "description": "this is a ready pallettes for using in applications",
   "main": "build/js/index.js",
