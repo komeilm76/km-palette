@@ -1,4 +1,4 @@
-import lib, { type IConfig } from './lib';
+import lib from './lib';
 import _ from 'lodash';
 // import jsonFix from 'json-fixer';
 // import type { IDefaultColor, IDefaultColorMode, IDefaultPaletteType } from './lib/defaultPalette';

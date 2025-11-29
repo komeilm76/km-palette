@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import type { IDefaultColor, IDefaultColorMode, IDefaultPaletteType } from './defaultPalette';
-import { format } from 'prettier';
+// import { format } from 'prettier';
 
 export type ISelectPalette<PALETTE extends string> = Record<PALETTE, boolean>;
 
@@ -306,6 +306,10 @@ const objectToCss = (object: object) => {
     .map(([k, v]) => `${k}:${v}`)
     .join(';');
   return css;
+};
+
+const format = async (data: string, options: { parser: 'css'; printWidth: number }) => {
+  return data;
 };
 const formatCss = async (css: string) => {
   return await format(css, { parser: 'css', printWidth: 140 });
