@@ -361,28 +361,40 @@ const makeCssAsString = async <PALETTE extends string, COLOR extends string, MOD
     },
   });
 
-  const variables: { css: string; name: string }[] = [];
-  const ligh: { css: string; name: string }[] = [];
-  const dark: { css: string; name: string }[] = [];
-  const tailwind: { css: string; name: string } = {
-    name: 'tailwind',
-    css: await formatCss(`@theme{${objectToCss(tailwindTheme)}}`),
-  };
+  const variables: { css: string; cssFileName: string; name: string }[] = [];
+  const light: { css: string; cssFileName: string; name: string }[] = [];
+  const dark: { css: string; cssFileName: string; name: string }[] = [];
+
   for (const key in rootVariables) {
     const css = `:root {${objectToCss(rootVariables[key])}}`;
-    variables.push({ css: await formatCss(css), name: key });
+    variables.push({ css: await formatCss(css), name: key, cssFileName: `${key}-variables.css` });
   }
   for (const key in lightClass) {
     const css = `.theme-${key}-light {${objectToCss(lightClass[key])}}`;
-    ligh.push({ css: await formatCss(css), name: key });
+    light.push({ css: await formatCss(css), name: key, cssFileName: `${key}-light.css` });
   }
   for (const key in darkClass) {
     const css = `.theme-${key}-dark {${objectToCss(darkClass[key])}}`;
-    dark.push({ css: await formatCss(css), name: key });
+    dark.push({ css: await formatCss(css), name: key, cssFileName: `${key}-dark.css` });
   }
+  const fileNames: string[] = [];
+  [variables, light, dark].forEach((items) => {
+    items.forEach((item) => {
+      fileNames.push(item.cssFileName);
+    });
+  });
+  const tailwindImports: string = [
+    '@import "tailwindcss";',
+    ...fileNames.map((fileName) => `@import "./${fileName}";`),
+  ].join('\n');
+  const tailwind: { css: string; cssFileName: string; name: string } = {
+    name: 'tailwind',
+    css: await formatCss(`${tailwindImports}\n@theme{${objectToCss(tailwindTheme)}}`),
+    cssFileName: 'tailwind.css',
+  };
   return {
     variables,
-    ligh,
+    light,
     dark,
     tailwind,
   };
