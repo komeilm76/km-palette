@@ -1,8 +1,18 @@
 import lib from './lib';
 import _ from 'lodash';
+import type { IDefaultColor, IDefaultColorMode, IDefaultPaletteType } from './lib/defaultPalette';
 // import jsonFix from 'json-fixer';
 // import type { IDefaultColor, IDefaultColorMode, IDefaultPaletteType } from './lib/defaultPalette';
-const kmPalette = lib;
+
+namespace kmPalette {
+  export type Color = IDefaultColor;
+  export type Mode = IDefaultColorMode;
+  export type Type = IDefaultPaletteType;
+  export const makeConfig = lib.makeConfig;
+  export const take = lib.take;
+  export const generateVuetifyPalette = lib.generateVuetifyPalette;
+  export const makeCssAsString = lib.makeCssAsString;
+}
 export default kmPalette;
 
 // const src = jetpack.cwd('src/assets/vuetify');
