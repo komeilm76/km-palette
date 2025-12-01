@@ -31,10 +31,10 @@ export default defineConfig([
     target: "esnext",
     platform: "neutral", // works in both browser + node
     minify: true,
-    async onSuccess() {
-      // await fs.copy("src/assets", "dist/assets");
-      console.log("✅ Copied assets to dist/assets");
-    },
+    // async onSuccess() {
+    //   // await fs.copy("src/assets", "dist/assets");
+    //   // console.log("✅ Copied assets to dist/assets");
+    // },
   },
 
   // --------------------------
