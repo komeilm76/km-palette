@@ -175,7 +175,6 @@ const take = <PALETTE extends string, COLOR extends string, MODE extends string>
   >,
   entryOptions: Partial<ISelectPalette<PALETTE>>,
 ) => {
-  
   const output = { ...config } as const;
   for (const key in output) {
     if (!entryOptions[key] == true) {
