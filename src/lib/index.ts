@@ -6,238 +6,177 @@ export type ISelectPalette<PALETTE extends string> = Record<PALETTE, boolean>;
 
 type IStrct = 'YES' | 'STRICT_COLOR' | 'NO';
 
-/**
- * Creates a typed color-theme configuration.
- * Strictness is controlled by the first generic:
- * - "YES" → all colors + modes required
- * - "STRICT_COLOR" → colors required, modes optional
- * - "NO" → everything optional
- *
- * @template {'YES' | 'STRICT_COLOR' | 'NO'} STRICT
- * @template {string} PALETTE
- * @template {string} COLOR
- * @template {string} MODE
- *
- * @param {STRICT extends 'YES'
- *   ? Record<PALETTE, {
- *       dark:  Record<COLOR | `${COLOR}-${MODE}`, string>;
- *       light: Record<COLOR | `${COLOR}-${MODE}`, string>;
- *     }>
- *   : STRICT extends 'STRICT_COLOR'
- *   ? Record<PALETTE, {
- *       dark:  Record<COLOR, string> & Partial<Record<`${COLOR}-${MODE}`, string>>;
- *       light: Record<COLOR, string> & Partial<Record<`${COLOR}-${MODE}`, string>>;
- *     }>
- *   : Record<PALETTE, {
- *       dark:  Partial<Record<COLOR | `${COLOR}-${MODE}`, string>>;
- *       light: Partial<Record<COLOR | `${COLOR}-${MODE}`, string>>;
- *     }>
- * } config
- *
- * @returns {typeof config}
- *
- * @example
- * // 1 — STRICT: "YES"
- * makeConfig<
- *  'YES',
- *  'wood' | 'chroma',
- *  'primary' | 'secondary',
- *  'hover' | 'focus'
- * >({
- *   wood: {
- *     dark: { primary: '#000', 'primary-hover': '#111', secondary: '#222', 'secondary-focus': '#333' },
- *     light:{ primary: '#fff', 'primary-hover': '#eee', secondary: '#ddd', 'secondary-focus': '#ccc' }
- *   },
- *   chroma: {
- *     dark: { primary: '#010', 'primary-hover': '#020', secondary: '#030', 'secondary-focus': '#040' },
- *     light:{ primary: '#f10', 'primary-hover': '#f20', secondary: '#f30', 'secondary-focus': '#f40' }
- *   }
- * });
- *
- * @example
- * // 2 — STRICT: "STRICT_COLOR"
- * makeConfig<
- *  'STRICT_COLOR',
- *  'neo',
- *  'primary' | 'background',
- *  'hover' | 'fade-1'
- * >({
- *   neo: {
- *     dark: { primary: '#000', background: '#222', 'primary-hover': '#333' },
- *     light:{ primary: '#fff', background: '#eee' }
- *   }
- * });
- *
- * @example
- * // 3 — STRICT: "NO"
- * makeConfig<
- *  'NO',
- *  'galaxy',
- *  'surface' | 'primary',
- *  'darken-1' | 'hover'
- * >({
- *   galaxy: {
- *     dark:  { primary: '#555', 'primary-hover': '#666' },
- *     light: { surface: '#ccc' }
- *   }
- * });
- *
- * @example
- * // 4
- * makeConfig<'NO','wood','primary','hover'>({
- *   wood: { dark:{ primary:'#000' }, light:{} }
- * });
- *
- * @example
- * // 5
- * makeConfig<'STRICT_COLOR','chroma','primary' | 'background','focus'>({
- *   chroma:{ dark:{ primary:'#222', background:'#333' }, light:{ primary:'#ddd' } }
- * });
- *
- * @example
- * // 6
- * makeConfig<'YES','neo','primary','hover'>({
- *   neo:{ dark:{ primary:'#111','primary-hover':'#222' }, light:{ primary:'#eee','primary-hover':'#fff' } }
- * });
- *
- * @example
- * // 7
- * makeConfig<'NO','galaxy','surface','fade-1'>({
- *   galaxy:{ dark:{ 'surface-fade-1':'#999' }, light:{} }
- * });
- *
- * @example
- * // 8
- * makeConfig<'STRICT_COLOR','wood','primary' | 'secondary','hover'>({
- *   wood:{ dark:{ primary:'#100', secondary:'#200','primary-hover':'#300' }, light:{ primary:'#eee', secondary:'#ddd' } }
- * });
- *
- * @example
- * // 9
- * makeConfig<'NO','neo' | 'galaxy','primary','darken-1'>({
- *   neo:{ dark:{ 'primary-darken-1':'#454545' }, light:{} }
- * });
- *
- * @example
- * // 10
- * makeConfig<'STRICT_COLOR','chroma','primary','hover' | 'fade-1'>({
- *   chroma:{ dark:{ primary:'#121212','primary-hover':'#131313' }, light:{ primary:'#fafafa' } }
- * });
- */
-
 const makeConfig = <
-  STRICT extends IStrct,
-  PALETTE extends string,
-  COLOR extends string,
-  MODE extends string,
+  T extends [STRICT, PALETTE, COLOR, MODE] | [STRICT, PALETTE, COLOR],
+  STRICT extends IStrct = IStrct,
+  PALETTE extends string = string,
+  COLOR extends string = string,
+  MODE extends string = string,
 >(
-  config: STRICT extends 'YES'
+  config: T['0'] extends 'YES'
     ? Record<
-        PALETTE,
+        T['1'],
         {
-          dark: Record<COLOR | `${COLOR}-${MODE}`, string>;
-          light: Record<COLOR | `${COLOR}-${MODE}`, string>;
+          dark: T['3'] extends string
+            ? Record<T['2'] | `${T['2']}-${T['3']}`, string>
+            : Record<T['2'], string>;
+          light: T['3'] extends string
+            ? Record<T['2'] | `${T['2']}-${T['3']}`, string>
+            : Record<T['2'], string>;
         }
       >
-    : STRICT extends 'STRICT_COLOR'
+    : T['0'] extends 'STRICT_COLOR'
       ? Record<
-          PALETTE,
+          T['1'],
           {
-            dark: Record<COLOR, string> & Partial<Record<`${COLOR}-${MODE}`, string>>;
-            light: Record<COLOR, string> & Partial<Record<`${COLOR}-${MODE}`, string>>;
+            dark: T['3'] extends string
+              ? Record<T['2'], string> & Partial<Record<`${T['2']}-${T['3']}`, string>>
+              : Record<T['2'], string> & Partial<Record<`${T['2']}`, string>>;
+            light: T['3'] extends string
+              ? Record<T['2'], string> & Partial<Record<`${T['2']}-${T['3']}`, string>>
+              : Record<T['2'], string> & Partial<Record<`${T['2']}`, string>>;
           }
         >
       : Record<
-          PALETTE,
+          T['1'],
           {
-            dark: Partial<Record<COLOR | `${COLOR}-${MODE}`, string>>;
-            light: Partial<Record<COLOR | `${COLOR}-${MODE}`, string>>;
+            dark: T['3'] extends string
+              ? Partial<Record<T['2'] | `${T['2']}-${T['3']}`, string>>
+              : Partial<Record<T['2'], string>>;
+            light: T['3'] extends string
+              ? Partial<Record<T['2'] | `${T['2']}-${T['3']}`, string>>
+              : Partial<Record<T['2'], string>>;
           }
         >,
 ) => {
   return config;
 };
 
-export type IConfig<
-  STRICT extends IStrct,
-  PALETTE extends string,
-  COLOR extends string,
-  MODE extends string,
-> = ReturnType<typeof makeConfig<STRICT, PALETTE, COLOR, MODE>>;
+export type IConfig<T extends [IStrct, string, string, string]> = ReturnType<
+  typeof makeConfig<[T['0'], T['1'], T['2'], T['3']]>
+>;
 
-const take = <PALETTE extends string, COLOR extends string, MODE extends string>(
+const take = <
+  T extends [PALETTE, COLOR, MODE] | [PALETTE, COLOR],
+  PALETTE extends string = string,
+  COLOR extends string = string,
+  MODE extends string = string,
+>(
   config: Record<
-    PALETTE,
+    T['0'],
     {
-      dark: Record<COLOR | `${COLOR}-${MODE}`, string>;
-      light: Record<COLOR | `${COLOR}-${MODE}`, string>;
+      dark: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
+      light: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
     }
   >,
-  entryOptions: Partial<ISelectPalette<PALETTE>>,
+  entryOptions: Partial<Record<T['0'], boolean>>,
 ) => {
   const output = { ...config } as const;
-  for (const key in output) {
+  for (const _key in output) {
+    const key = _key as T['0'];
     if (!entryOptions[key] == true) {
       delete output[key];
     }
   }
-  // const filtered = _.filter(config, (data, key) => {
-  //   return entryOptions[key as PALETTE] == true;
-  // });
   return { config: output, names: Object.keys(output) };
 };
 
-const generateVuetifyPalette = <PALETTE extends string, COLOR extends string, MODE extends string>(
+// take<['wood', 'primary' | 'secondary']>(
+//   {
+//     wood: {
+//       dark: {
+
+//       },
+
+//     },
+//   },
+//   { wood: true },
+// );
+
+const generateVuetifyPalette = <
+  T extends [PALETTE, COLOR, MODE] | [PALETTE, COLOR],
+  PALETTE extends string = string,
+  COLOR extends string = string,
+  MODE extends string = string,
+>(
   config: Record<
-    PALETTE,
+    T['0'],
     {
-      dark: Record<COLOR | `${COLOR}-${MODE}`, string>;
-      light: Record<COLOR | `${COLOR}-${MODE}`, string>;
+      dark: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
+      light: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
     }
   >,
 ) => {
   const result = () => {
     const output = {} as Record<
-      `${PALETTE}-dark` | `${PALETTE}-light`,
-      { colors: Record<COLOR | `${COLOR}-${MODE}`, string>; dark: boolean }
+      `${T['0']}-dark` | `${T['0']}-light`,
+      {
+        colors: T['2'] extends string
+          ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+          : Record<T['1'], string>;
+        dark: boolean;
+      }
     >;
     for (const _key in config) {
-      const { light, dark } = config[_key];
-      output[`${_key}-dark`] = { colors: dark, dark: true };
-      output[`${_key}-light`] = { colors: light, dark: false };
+      const key = _key as T['0'];
+      const { light, dark } = config[key];
+      output[`${key}-dark`] = { colors: dark, dark: true };
+      output[`${key}-light`] = { colors: light, dark: false };
     }
     return output;
   };
   return result();
 };
 
-const generateFlattenPalette = <PALETTE extends string, COLOR extends string, MODE extends string>(
+const generateFlattenPalette = <
+  T extends [PALETTE, COLOR, MODE] | [PALETTE, COLOR],
+  PALETTE extends string = string,
+  COLOR extends string = string,
+  MODE extends string = string,
+>(
   config: Record<
-    PALETTE,
+    T['0'],
     {
-      dark: Record<COLOR | `${COLOR}-${MODE}`, string>;
-      light: Record<COLOR | `${COLOR}-${MODE}`, string>;
+      dark: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
+      light: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
     }
   >,
 ) => {
   const result = () => {
     const output = {} as Record<
-      | `${PALETTE}-dark-${COLOR}`
-      | `${PALETTE}-light-${COLOR}`
-      | `${PALETTE}-dark-${COLOR}-${MODE}`
-      | `${PALETTE}-light-${COLOR}-${MODE}`,
+      T['2'] extends string
+        ?
+            | `${T['0']}-dark-${T['1']}`
+            | `${T['0']}-light-${T['1']}`
+            | `${T['0']}-dark-${T['1']}-${T['2']}`
+            | `${T['0']}-light-${T['1']}-${T['2']}`
+        : `${T['0']}-dark-${T['1']}` | `${T['0']}-light-${T['1']}`,
       string
     >;
+
     for (const _key in config) {
-      const { light, dark } = config[_key];
+      const key = _key as T['0'];
+      const { light, dark } = config[key];
       for (const color in dark) {
-        const outputKey = `${_key}-dark-${color as COLOR}` as const;
-        const outputValue = dark[color as COLOR];
+        const outputKey = `${key}-dark-${color}` as keyof typeof output;
+        const outputValue = dark[color];
         output[outputKey] = outputValue;
       }
       for (const color in light) {
-        const outputKey = `${_key}-light-${color as COLOR}` as const;
-        const outputValue = light[color as COLOR];
+        const outputKey = `${key}-light-${color}` as keyof typeof output;
+        const outputValue = light[color];
         output[outputKey] = outputValue;
       }
     }
@@ -246,44 +185,66 @@ const generateFlattenPalette = <PALETTE extends string, COLOR extends string, MO
   return result();
 };
 
-const onEachColorOfPalette = <PALETTE extends string, COLOR extends string, MODE extends string>(
+const onEachColorOfPalette = <
+  T extends [PALETTE, COLOR, MODE] | [PALETTE, COLOR],
+  PALETTE extends string = string,
+  COLOR extends string = string,
+  MODE extends string = string,
+>(
   config: Record<
-    PALETTE,
+    T['0'],
     {
-      dark: Record<COLOR | `${COLOR}-${MODE}`, string>;
-      light: Record<COLOR | `${COLOR}-${MODE}`, string>;
+      dark: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
+      light: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
     }
   >,
   options: {
-    onFinishPalette: (paletteName: PALETTE, paletteValue: (typeof config)[PALETTE]) => void;
-    onStartPalette: (paletteName: PALETTE, paletteValue: (typeof config)[PALETTE]) => void;
+    onFinishPalette: (paletteName: T['0'], paletteValue: (typeof config)[T['0']]) => void;
+    onStartPalette: (paletteName: T['0'], paletteValue: (typeof config)[T['0']]) => void;
     onFinishThemeMode: (
       themeMode: 'dark' | 'light',
-      paletteName: PALETTE,
-      paletteValue: (typeof config)[PALETTE],
+      paletteName: T['0'],
+      paletteValue: (typeof config)[T['0']],
     ) => void;
     onColor: (
-      colorName: COLOR,
+      colorName: T['1'] | (T['2'] extends string ? `${T['1']}-${T['2']}` : T['1']),
       colorValue: string,
       themeMode: 'dark' | 'light',
-      paletteName: PALETTE,
-      paletteValue: (typeof config)[PALETTE],
+      paletteName: T['0'],
+      paletteValue: (typeof config)[T['0']],
     ) => void;
   },
 ) => {
   const result = () => {
     for (const _key in config) {
-      options.onStartPalette(_key, config[_key]);
-      const { light, dark } = config[_key];
+      const key = _key as T['0'];
+      options.onStartPalette(key, config[key]);
+      const { light, dark } = config[key];
       for (const color in dark) {
-        options.onColor(color as COLOR, dark[color as COLOR], 'dark', _key, config[_key]);
+        options.onColor(
+          color as unknown as T['1'] | (T['2'] extends string ? `${T['1']}-${T['2']}` : T['1']),
+          dark[color],
+          'dark',
+          key,
+          config[key],
+        );
       }
-      options.onFinishThemeMode('dark', _key, config[_key]);
-      for (const color in dark) {
-        options.onColor(color as COLOR, light[color as COLOR], 'light', _key, config[_key]);
+      options.onFinishThemeMode('dark', key, config[key]);
+      for (const color in light) {
+        options.onColor(
+          color as unknown as T['1'] | (T['2'] extends string ? `${T['1']}-${T['2']}` : T['1']),
+          light[color],
+          'light',
+          key,
+          config[key],
+        );
       }
-      options.onFinishThemeMode('light', _key, config[_key]);
-      options.onFinishPalette(_key, config[_key]);
+      options.onFinishThemeMode('light', key, config[key]);
+      options.onFinishPalette(key, config[key]);
     }
   };
   return result();
@@ -327,12 +288,21 @@ const makeTailwindClass = <OBJECT extends object, PREFIX extends string>(
   return output;
 };
 
-const makeCssAsString = async <PALETTE extends string, COLOR extends string, MODE extends string>(
+const makeCssAsString = async <
+  T extends [PALETTE, COLOR, MODE] | [PALETTE, COLOR],
+  PALETTE extends string = string,
+  COLOR extends string = string,
+  MODE extends string = string,
+>(
   config: Record<
-    PALETTE,
+    T['0'],
     {
-      dark: Record<COLOR | `${COLOR}-${MODE}`, string>;
-      light: Record<COLOR | `${COLOR}-${MODE}`, string>;
+      dark: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
+      light: T['2'] extends string
+        ? Record<T['1'] | `${T['1']}-${T['2']}`, string>
+        : Record<T['1'], string>;
     }
   >,
 ) => {
@@ -340,7 +310,7 @@ const makeCssAsString = async <PALETTE extends string, COLOR extends string, MOD
   const lightClass: any = {};
   const darkClass: any = {};
   const tailwindTheme: any = {};
-  onEachColorOfPalette<PALETTE, COLOR, MODE>(config, {
+  onEachColorOfPalette(config, {
     onStartPalette: (paletteName, paletteValue) => {
       rootVariables[paletteName] = {};
       lightClass[paletteName] = {};
